@@ -1,0 +1,235 @@
+---
+title: " Mixed-model QTL detection by linkage disequilibrium analysis"
+author: "Lucia Gutierrez"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+```{r, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+library(lmem.gwaser)
+```
+
+
+## Introduction
+
+Most of the traits that plant breeders work with in their breeding programs are
+quantitative traits. Trait’s variation is therefore the result of a large number of QTL
+(Quantitative Trait Loci), each one with a minor effect. The objective of QTL 
+mapping is to dissect the complexity of quantitative traits by identifying as many 
+as possible of the individual QTLs. This is sometimes referred to as 
+‘Mendelizing’ complex traits.
+
+Linkage disequilibrium mapping (LD) or association mapping (GWAS) is a method for QTL
+(Quantitative Trait Locus) detection widely applied in human genetics. It essentially
+consists in finding marker-trait associations in genetically diverse populations. 
+GWAS has recently gained attention in plant genetics. An important asset of association
+mapping is that there is no need to develop specific crosses as it can take 
+advantage of the use of existing diverse collections of genotypes. 
+In addition, association mapping can target a broader and more relevant genetic 
+spectrum for plant breeders than conventional QTL mapping does. However, 
+significant markertrait association may or may not be the consequence of physical
+linkage between markers and QTLs (false positives or ‘spurious’ associations). 
+A major cause of false positives is the genetic correlation between individuals
+stemming from the genetic relatedness. Several strategies have been proposed to 
+account for genetic relatedness, either by structuring the population and imposing 
+the groupings in the statistical model (Kraakman et al. 2004; Pritchard et al. 2000) 
+or by using estimates of genetic relatedness between individuals - coancestry 
+information - in a mixed model (Malosetti et al. 2007; Yu et al. 2006). 
+An interesting intermediate approach is that based on principal component
+analysis ideas proposed by Patterson et al. (Patterson et al. 2006). 
+The different methods have been implemented in R procedures.
+
+### Use lmem.gwaser
+
+In this vignette, you will use _lmem.gwaser_ to perform association mapping based on
+different methods to account for genetic relatedness. 
+
+### GWAS in a barley association panel (Real experimental data)
+
+A research program (MABDE) was set up to investigate patterns of adaptation in barley.
+In this project a large set of barley genotypes (~190 genotypes) were evaluated in
+Europe and in the Mediterranean region. More details about this population and research
+can be found in Comadran et al. (2009). In this example we use the information in one 
+of those environments, for a set of 179 genotypes. 
+The population was genotyped by DArTs. The data is in the following files:
+**QA_pheno** (phenotypic information), **QA_geno** (genotypic information), 
+**QA_map** (map information).
+
+### Data import.
+
+```{r, eval = FALSE}
+
+library(lmem.gwaser)
+
+data ("QA_geno")
+data ("QA_map")
+data ("QA_pheno")
+
+P.data <- data ("QA_pheno")
+G.data <- data ("QA_geno")
+map.data <- data ("QA_map")
+
+gwas.cross (P.data, G.data, map.data,cross='gwas', heterozygotes=FALSE)
+
+summary (cross.data)
+
+```
+
+### Data quality check.
+
+A number of simple diagnostics plots and descriptive statistics can be very
+useful to identify values / observations that need to be confirmed or errors that might
+have occurred during the data generation or processing.
+
+
+```{r, eval = FALSE}
+
+# Marker Quality
+mq.g.diagnostics (crossobj=cross.data,I.threshold=0.1, p.val=0.01,na.cutoff=0.1)
+
+```
+
+
+### Investigate population structure by principal component analysis.
+
+One of the critical aspects of LD mapping, and one of the major differences with 
+conventional QTL mapping approaches, is that linkage disequilibrium between markers and
+between markers and QTLs can occur even when there is no genetic linkage between them.
+A major source of LD not related to physical proximity between markers (or QTLs) 
+is the genetic relatedness between individuals in the population.
+Therefore, an important first step in an association mapping study is to investigate
+population genetic structure. 
+A popular example is the approach described by Pritchard et al. (2000) and
+implemented in the program STRUCTURE. However, this approach can be computing
+intensive. An alternative strategy is that suggested by Patterson et al. (2006), which
+proposed to use the scores of the most significant principal components of the genotype
+by marker scores matrix to account for population structure. 
+Study the population structure by performing a principal component analysis in
+_lmen.gwaser_ using __pca.analysis__ function.
+
+```{r, eval = FALSE}
+
+pca <- pca.analysis(crossobj=cross.data, p.val=0.05)
+
+```
+
+
+
+### Perform marker trait association using different models. 
+
+LD between markers can be inflated by genetic relatedness. Similarly, a statistical
+association between a marker and a QTL can be the consequence of genetic relatedness.
+Therefore, the model used to test for marker-trait association must correct for genetic
+relatedness. Within R it is possible to perform the test for marker-trait
+associations correcting for genetic relatedness in either of the following ways:
+
+1) by using the scores of the significant principal components of the markers as
+covariates in the model
+
+2) by including a kinship matrix with coefficients of coancestry between genotypes in
+the mixed model
+
+3) by using a factor indicating group membership of each of the genotypes (e.g.
+geographical origin, groups from STRUCTURE, etc). 
+
+It is also possible to run an analysis without correction for genetic relatedness
+(naïve analysis), generally for comparison purposes.
+
+
+### Mixed model
+A mixed-effects model including both population structure and coancestry
+among genotypes following Yu et al. 2006.
+
+```{r, eval = FALSE}
+qk.GWAS <- gwas.analysis (crossobj=cross.data, method='QK', provide.K=FALSE,
+                          covariates=pca$scores, trait='yield', 
+                          threshold='Li&Ji', p=0.05,
+                          out.file='GWAS Q + K model')
+
+```
+
+##### Mixed model: Eigenanalysis (PCA as random component)
+Perform a genome-wide marker-trait association using the 
+principal component scores to correct for genetic relatedness (Eigenanalysis).
+You may use _gwas.analysis_ function with the method **eigenstrat** to do this.
+
+```{r, eval = FALSE}
+pcaR.GWAS <- gwas.analysis(crossobj=cross.data, method='eigenstrat',
+                           provide.K=FALSE, covariates=pca$scores, 
+                           trait='yield',
+                           threshold='Li&Ji', p=0.05, 
+                           out.file='GWAS PCA as Random model')
+```
+
+
+##### Mixed model: Kinship model
+Perform a genome-wide marker-trait association using kinship information in the mixed
+model. Use kinship estimated with marker data. You can use the _gwas.analysis_ function
+with the method **kinship** and provide.K=FALSE to do this.
+
+```{r, eval = FALSE}
+k.GWAS <- gwas.analysis(crossobj=cross.data, method='kinship',
+                          provide.K=FALSE, covariates=FALSE, trait='yield',
+                          threshold='Li&Ji', p=0.05, 
+                          out.file =' GWAS K as Random model ')
+```
+
+##### Fixed effects: Groups
+Perform a genome-wide marker-trait association using group membership to correct for
+genetic relatedness. You may use the _gwas.analysis_ function with method **fixed** and
+covariates *the groups* to perform this analysis. 
+
+```{r, eval = FALSE}
+data (QA_pheno)
+P.data.1 <- QA_pheno
+covariate <- P.data.1 [,2]
+
+g.GWAS <- gwas.analysis (crossobj=cross.data,
+                         method='fixed', provide.K=FALSE, 
+                         covariates=covariate,
+                         trait='yield', threshold='Li&Ji', p=0.05,
+                         out.file='GWAS fixed Groups model')
+```
+
+##### Naive
+Perform a genome-wide marker-trait association without correction for genetic 
+relatedness (naive model). You may use the am function with the method **naive** to 
+perform this analysis. .
+
+```{r, eval = FALSE}
+naive.GWAS <- gwas.analysis(crossobj=cross.data4, method='naive',
+                            provide.K=FALSE, covariates=FALSE, 
+                            trait='yield', threshold='Li&Ji',
+                             p=0.05, out.file='GWAS naive model')
+```
+
+
+## References
+Comadran J, Thomas W, van Eeuwijk F, Ceccarelli S, Grando S, Stanca A, Pecchioni N,
+         Akar T, Al-Yassin A, Benbelkacem A, Ouabbou H, Bort J, Romagosa I, 
+         Hackett Russell J (2009) Patterns of genetic diversity and linkage
+         disequilibrium in a highly structured Hordeum vulgare association-mapping
+         population for the Mediterranean basin. Theor Appl Genet 119:175-187
+
+Kraakman ATW, Niks RE, Van den Berg PMMM, Stam P, Van Eeuwijk FA (2004) Linkage
+         Disequilibrium Mapping of Yield and Yield Stability in Modern Spring Barley
+         Cultivars.Genetics 168:435-446
+
+Malosetti M, van der Linden CG, Vosman B, van Eeuwijk FA (2007) A Mixed-Model Approach
+         to Association Mapping Using Pedigree Information With an Illustration of
+         Resistance to Phytophthora infestans in Potato. Genetics 175:879-889
+
+Patterson N, Price AL, Reich D (2006) Population Structure and Eigenanalysis. PLoS 
+         Genet 2:e190
+
+Pritchard JK, Stephens M, Rosenberg NA, Donnelly P (2000) Association mapping in  
+         structured populations. Am J Hum Genet 67:170-181
+
+Yu J, Pressoir G, Briggs WH, Vroh Bi I, Yamasaki M, Doebley JF, McMullen MD, Gaut BS,
+        Nielsen DM, Holland JB, Kresovich S, Buckler ES (2006) A unified mixed-model
+        method for association mapping that accounts for multiple levels of
+        relatedness. Nat Genet 38:203-208

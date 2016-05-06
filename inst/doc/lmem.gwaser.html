@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<meta name="author" content="Lucia Gutierrez" />
+
+<meta name="date" content="2016-05-05" />
+
+<title>Mixed-model QTL detection by linkage disequilibrium analysis</title>
+
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+</style>
+
+
+
+<link href="data:text/css;charset=utf-8,body%20%7B%0Abackground%2Dcolor%3A%20%23fff%3B%0Amargin%3A%201em%20auto%3B%0Amax%2Dwidth%3A%20700px%3B%0Aoverflow%3A%20visible%3B%0Apadding%2Dleft%3A%202em%3B%0Apadding%2Dright%3A%202em%3B%0Afont%2Dfamily%3A%20%22Open%20Sans%22%2C%20%22Helvetica%20Neue%22%2C%20Helvetica%2C%20Arial%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%2014px%3B%0Aline%2Dheight%3A%201%2E35%3B%0A%7D%0A%23header%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0A%23TOC%20%7B%0Aclear%3A%20both%3B%0Amargin%3A%200%200%2010px%2010px%3B%0Apadding%3A%204px%3B%0Awidth%3A%20400px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Aborder%2Dradius%3A%205px%3B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Afont%2Dsize%3A%2013px%3B%0Aline%2Dheight%3A%201%2E3%3B%0A%7D%0A%23TOC%20%2Etoctitle%20%7B%0Afont%2Dweight%3A%20bold%3B%0Afont%2Dsize%3A%2015px%3B%0Amargin%2Dleft%3A%205px%3B%0A%7D%0A%23TOC%20ul%20%7B%0Apadding%2Dleft%3A%2040px%3B%0Amargin%2Dleft%3A%20%2D1%2E5em%3B%0Amargin%2Dtop%3A%205px%3B%0Amargin%2Dbottom%3A%205px%3B%0A%7D%0A%23TOC%20ul%20ul%20%7B%0Amargin%2Dleft%3A%20%2D2em%3B%0A%7D%0A%23TOC%20li%20%7B%0Aline%2Dheight%3A%2016px%3B%0A%7D%0Atable%20%7B%0Amargin%3A%201em%20auto%3B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dcolor%3A%20%23DDDDDD%3B%0Aborder%2Dstyle%3A%20outset%3B%0Aborder%2Dcollapse%3A%20collapse%3B%0A%7D%0Atable%20th%20%7B%0Aborder%2Dwidth%3A%202px%3B%0Apadding%3A%205px%3B%0Aborder%2Dstyle%3A%20inset%3B%0A%7D%0Atable%20td%20%7B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dstyle%3A%20inset%3B%0Aline%2Dheight%3A%2018px%3B%0Apadding%3A%205px%205px%3B%0A%7D%0Atable%2C%20table%20th%2C%20table%20td%20%7B%0Aborder%2Dleft%2Dstyle%3A%20none%3B%0Aborder%2Dright%2Dstyle%3A%20none%3B%0A%7D%0Atable%20thead%2C%20table%20tr%2Eeven%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Ap%20%7B%0Amargin%3A%200%2E5em%200%3B%0A%7D%0Ablockquote%20%7B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Apadding%3A%200%2E25em%200%2E75em%3B%0A%7D%0Ahr%20%7B%0Aborder%2Dstyle%3A%20solid%3B%0Aborder%3A%20none%3B%0Aborder%2Dtop%3A%201px%20solid%20%23777%3B%0Amargin%3A%2028px%200%3B%0A%7D%0Adl%20%7B%0Amargin%2Dleft%3A%200%3B%0A%7D%0Adl%20dd%20%7B%0Amargin%2Dbottom%3A%2013px%3B%0Amargin%2Dleft%3A%2013px%3B%0A%7D%0Adl%20dt%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Aul%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0Aul%20li%20%7B%0Alist%2Dstyle%3A%20circle%20outside%3B%0A%7D%0Aul%20ul%20%7B%0Amargin%2Dbottom%3A%200%3B%0A%7D%0Apre%2C%20code%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0Aborder%2Dradius%3A%203px%3B%0Acolor%3A%20%23333%3B%0Awhite%2Dspace%3A%20pre%2Dwrap%3B%20%0A%7D%0Apre%20%7B%0Aborder%2Dradius%3A%203px%3B%0Amargin%3A%205px%200px%2010px%200px%3B%0Apadding%3A%2010px%3B%0A%7D%0Apre%3Anot%28%5Bclass%5D%29%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20Consolas%2C%20Monaco%2C%20%27Courier%20New%27%2C%20monospace%3B%0Afont%2Dsize%3A%2085%25%3B%0A%7D%0Ap%20%3E%20code%2C%20li%20%3E%20code%20%7B%0Apadding%3A%202px%200px%3B%0A%7D%0Adiv%2Efigure%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0Aimg%20%7B%0Abackground%2Dcolor%3A%20%23FFFFFF%3B%0Apadding%3A%202px%3B%0Aborder%3A%201px%20solid%20%23DDDDDD%3B%0Aborder%2Dradius%3A%203px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Amargin%3A%200%205px%3B%0A%7D%0Ah1%20%7B%0Amargin%2Dtop%3A%200%3B%0Afont%2Dsize%3A%2035px%3B%0Aline%2Dheight%3A%2040px%3B%0A%7D%0Ah2%20%7B%0Aborder%2Dbottom%3A%204px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Apadding%2Dbottom%3A%202px%3B%0Afont%2Dsize%3A%20145%25%3B%0A%7D%0Ah3%20%7B%0Aborder%2Dbottom%3A%202px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Afont%2Dsize%3A%20120%25%3B%0A%7D%0Ah4%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23f7f7f7%3B%0Amargin%2Dleft%3A%208px%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Ah5%2C%20h6%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23ccc%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Aa%20%7B%0Acolor%3A%20%230033dd%3B%0Atext%2Ddecoration%3A%20none%3B%0A%7D%0Aa%3Ahover%20%7B%0Acolor%3A%20%236666ff%3B%20%7D%0Aa%3Avisited%20%7B%0Acolor%3A%20%23800080%3B%20%7D%0Aa%3Avisited%3Ahover%20%7B%0Acolor%3A%20%23BB00BB%3B%20%7D%0Aa%5Bhref%5E%3D%22http%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0Aa%5Bhref%5E%3D%22https%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0A%0Acode%20%3E%20span%2Ekw%20%7B%20color%3A%20%23555%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Edt%20%7B%20color%3A%20%23902000%3B%20%7D%20%0Acode%20%3E%20span%2Edv%20%7B%20color%3A%20%2340a070%3B%20%7D%20%0Acode%20%3E%20span%2Ebn%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Efl%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Ech%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Est%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Eco%20%7B%20color%3A%20%23888888%3B%20font%2Dstyle%3A%20italic%3B%20%7D%20%0Acode%20%3E%20span%2Eot%20%7B%20color%3A%20%23007020%3B%20%7D%20%0Acode%20%3E%20span%2Eal%20%7B%20color%3A%20%23ff0000%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Efu%20%7B%20color%3A%20%23900%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%20code%20%3E%20span%2Eer%20%7B%20color%3A%20%23a61717%3B%20background%2Dcolor%3A%20%23e3d2d2%3B%20%7D%20%0A" rel="stylesheet" type="text/css" />
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title">Mixed-model QTL detection by linkage disequilibrium analysis</h1>
+<h4 class="author"><em>Lucia Gutierrez</em></h4>
+<h4 class="date"><em>2016-05-05</em></h4>
+
+
+
+<div id="introduction" class="section level2">
+<h2>Introduction</h2>
+<p>Most of the traits that plant breeders work with in their breeding programs are quantitative traits. Trait’s variation is therefore the result of a large number of QTL (Quantitative Trait Loci), each one with a minor effect. The objective of QTL mapping is to dissect the complexity of quantitative traits by identifying as many as possible of the individual QTLs. This is sometimes referred to as ‘Mendelizing’ complex traits.</p>
+<p>Linkage disequilibrium mapping (LD) or association mapping (GWAS) is a method for QTL (Quantitative Trait Locus) detection widely applied in human genetics. It essentially consists in finding marker-trait associations in genetically diverse populations. GWAS has recently gained attention in plant genetics. An important asset of association mapping is that there is no need to develop specific crosses as it can take advantage of the use of existing diverse collections of genotypes. In addition, association mapping can target a broader and more relevant genetic spectrum for plant breeders than conventional QTL mapping does. However, significant markertrait association may or may not be the consequence of physical linkage between markers and QTLs (false positives or ‘spurious’ associations). A major cause of false positives is the genetic correlation between individuals stemming from the genetic relatedness. Several strategies have been proposed to account for genetic relatedness, either by structuring the population and imposing the groupings in the statistical model (Kraakman et al. 2004; Pritchard et al. 2000) or by using estimates of genetic relatedness between individuals - coancestry information - in a mixed model (Malosetti et al. 2007; Yu et al. 2006). An interesting intermediate approach is that based on principal component analysis ideas proposed by Patterson et al. (Patterson et al. 2006). The different methods have been implemented in R procedures.</p>
+<div id="use-lmem.gwaser" class="section level3">
+<h3>Use lmem.gwaser</h3>
+<p>In this vignette, you will use <em>lmem.gwaser</em> to perform association mapping based on different methods to account for genetic relatedness.</p>
+</div>
+<div id="gwas-in-a-barley-association-panel-real-experimental-data" class="section level3">
+<h3>GWAS in a barley association panel (Real experimental data)</h3>
+<p>A research program (MABDE) was set up to investigate patterns of adaptation in barley. In this project a large set of barley genotypes (~190 genotypes) were evaluated in Europe and in the Mediterranean region. More details about this population and research can be found in Comadran et al. (2009). In this example we use the information in one of those environments, for a set of 179 genotypes. The population was genotyped by DArTs. The data is in the following files: <strong>QA_pheno</strong> (phenotypic information), <strong>QA_geno</strong> (genotypic information), <strong>QA_map</strong> (map information).</p>
+</div>
+<div id="data-import." class="section level3">
+<h3>Data import.</h3>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">
+<span class="kw">library</span>(lmem.gwaser)
+
+<span class="kw">data</span> (<span class="st">&quot;QA_geno&quot;</span>)
+<span class="kw">data</span> (<span class="st">&quot;QA_map&quot;</span>)
+<span class="kw">data</span> (<span class="st">&quot;QA_pheno&quot;</span>)
+
+P.data &lt;-<span class="st"> </span><span class="kw">data</span> (<span class="st">&quot;QA_pheno&quot;</span>)
+G.data &lt;-<span class="st"> </span><span class="kw">data</span> (<span class="st">&quot;QA_geno&quot;</span>)
+map.data &lt;-<span class="st"> </span><span class="kw">data</span> (<span class="st">&quot;QA_map&quot;</span>)
+
+<span class="kw">gwas.cross</span> (P.data, G.data, map.data,<span class="dt">cross=</span><span class="st">'gwas'</span>, <span class="dt">heterozygotes=</span><span class="ot">FALSE</span>)
+
+<span class="kw">summary</span> (cross.data)</code></pre></div>
+</div>
+<div id="data-quality-check." class="section level3">
+<h3>Data quality check.</h3>
+<p>A number of simple diagnostics plots and descriptive statistics can be very useful to identify values / observations that need to be confirmed or errors that might have occurred during the data generation or processing.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">
+<span class="co"># Marker Quality</span>
+<span class="kw">mq.g.diagnostics</span> (<span class="dt">crossobj=</span>cross.data,<span class="dt">I.threshold=</span><span class="fl">0.1</span>, <span class="dt">p.val=</span><span class="fl">0.01</span>,<span class="dt">na.cutoff=</span><span class="fl">0.1</span>)</code></pre></div>
+</div>
+<div id="investigate-population-structure-by-principal-component-analysis." class="section level3">
+<h3>Investigate population structure by principal component analysis.</h3>
+<p>One of the critical aspects of LD mapping, and one of the major differences with conventional QTL mapping approaches, is that linkage disequilibrium between markers and between markers and QTLs can occur even when there is no genetic linkage between them. A major source of LD not related to physical proximity between markers (or QTLs) is the genetic relatedness between individuals in the population. Therefore, an important first step in an association mapping study is to investigate population genetic structure. A popular example is the approach described by Pritchard et al. (2000) and implemented in the program STRUCTURE. However, this approach can be computing intensive. An alternative strategy is that suggested by Patterson et al. (2006), which proposed to use the scores of the most significant principal components of the genotype by marker scores matrix to account for population structure. Study the population structure by performing a principal component analysis in <em>lmen.gwaser</em> using <strong>pca.analysis</strong> function.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">
+pca &lt;-<span class="st"> </span><span class="kw">pca.analysis</span>(<span class="dt">crossobj=</span>cross.data, <span class="dt">p.val=</span><span class="fl">0.05</span>)</code></pre></div>
+</div>
+<div id="perform-marker-trait-association-using-different-models." class="section level3">
+<h3>Perform marker trait association using different models.</h3>
+<p>LD between markers can be inflated by genetic relatedness. Similarly, a statistical association between a marker and a QTL can be the consequence of genetic relatedness. Therefore, the model used to test for marker-trait association must correct for genetic relatedness. Within R it is possible to perform the test for marker-trait associations correcting for genetic relatedness in either of the following ways:</p>
+<ol style="list-style-type: decimal">
+<li><p>by using the scores of the significant principal components of the markers as covariates in the model</p></li>
+<li><p>by including a kinship matrix with coefficients of coancestry between genotypes in the mixed model</p></li>
+<li><p>by using a factor indicating group membership of each of the genotypes (e.g. geographical origin, groups from STRUCTURE, etc).</p></li>
+</ol>
+<p>It is also possible to run an analysis without correction for genetic relatedness (naïve analysis), generally for comparison purposes.</p>
+</div>
+<div id="mixed-model" class="section level3">
+<h3>Mixed model</h3>
+<p>A mixed-effects model including both population structure and coancestry among genotypes following Yu et al. 2006.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">qk.GWAS &lt;-<span class="st"> </span><span class="kw">gwas.analysis</span> (<span class="dt">crossobj=</span>cross.data, <span class="dt">method=</span><span class="st">'QK'</span>, <span class="dt">provide.K=</span><span class="ot">FALSE</span>,
+                          <span class="dt">covariates=</span>pca$scores, <span class="dt">trait=</span><span class="st">'yield'</span>, 
+                          <span class="dt">threshold=</span><span class="st">'Li&amp;Ji'</span>, <span class="dt">p=</span><span class="fl">0.05</span>,
+                          <span class="dt">out.file=</span><span class="st">'GWAS Q + K model'</span>)</code></pre></div>
+<div id="mixed-model-eigenanalysis-pca-as-random-component" class="section level5">
+<h5>Mixed model: Eigenanalysis (PCA as random component)</h5>
+<p>Perform a genome-wide marker-trait association using the principal component scores to correct for genetic relatedness (Eigenanalysis). You may use <em>gwas.analysis</em> function with the method <strong>eigenstrat</strong> to do this.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">pcaR.GWAS &lt;-<span class="st"> </span><span class="kw">gwas.analysis</span>(<span class="dt">crossobj=</span>cross.data, <span class="dt">method=</span><span class="st">'eigenstrat'</span>,
+                           <span class="dt">provide.K=</span><span class="ot">FALSE</span>, <span class="dt">covariates=</span>pca$scores, 
+                           <span class="dt">trait=</span><span class="st">'yield'</span>,
+                           <span class="dt">threshold=</span><span class="st">'Li&amp;Ji'</span>, <span class="dt">p=</span><span class="fl">0.05</span>, 
+                           <span class="dt">out.file=</span><span class="st">'GWAS PCA as Random model'</span>)</code></pre></div>
+</div>
+<div id="mixed-model-kinship-model" class="section level5">
+<h5>Mixed model: Kinship model</h5>
+<p>Perform a genome-wide marker-trait association using kinship information in the mixed model. Use kinship estimated with marker data. You can use the <em>gwas.analysis</em> function with the method <strong>kinship</strong> and provide.K=FALSE to do this.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">k.GWAS &lt;-<span class="st"> </span><span class="kw">gwas.analysis</span>(<span class="dt">crossobj=</span>cross.data, <span class="dt">method=</span><span class="st">'kinship'</span>,
+                          <span class="dt">provide.K=</span><span class="ot">FALSE</span>, <span class="dt">covariates=</span><span class="ot">FALSE</span>, <span class="dt">trait=</span><span class="st">'yield'</span>,
+                          <span class="dt">threshold=</span><span class="st">'Li&amp;Ji'</span>, <span class="dt">p=</span><span class="fl">0.05</span>, 
+                          <span class="dt">out.file =</span><span class="st">' GWAS K as Random model '</span>)</code></pre></div>
+</div>
+<div id="fixed-effects-groups" class="section level5">
+<h5>Fixed effects: Groups</h5>
+<p>Perform a genome-wide marker-trait association using group membership to correct for genetic relatedness. You may use the <em>gwas.analysis</em> function with method <strong>fixed</strong> and covariates <em>the groups</em> to perform this analysis.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">data</span> (QA_pheno)
+P.data<span class="fl">.1</span> &lt;-<span class="st"> </span>QA_pheno
+covariate &lt;-<span class="st"> </span>P.data<span class="fl">.1</span> [,<span class="dv">2</span>]
+
+g.GWAS &lt;-<span class="st"> </span><span class="kw">gwas.analysis</span> (<span class="dt">crossobj=</span>cross.data,
+                         <span class="dt">method=</span><span class="st">'fixed'</span>, <span class="dt">provide.K=</span><span class="ot">FALSE</span>, 
+                         <span class="dt">covariates=</span>covariate,
+                         <span class="dt">trait=</span><span class="st">'yield'</span>, <span class="dt">threshold=</span><span class="st">'Li&amp;Ji'</span>, <span class="dt">p=</span><span class="fl">0.05</span>,
+                         <span class="dt">out.file=</span><span class="st">'GWAS fixed Groups model'</span>)</code></pre></div>
+</div>
+<div id="naive" class="section level5">
+<h5>Naive</h5>
+<p>Perform a genome-wide marker-trait association without correction for genetic relatedness (naive model). You may use the am function with the method <strong>naive</strong> to perform this analysis. .</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">naive.GWAS &lt;-<span class="st"> </span><span class="kw">gwas.analysis</span>(<span class="dt">crossobj=</span>cross.data4, <span class="dt">method=</span><span class="st">'naive'</span>,
+                            <span class="dt">provide.K=</span><span class="ot">FALSE</span>, <span class="dt">covariates=</span><span class="ot">FALSE</span>, 
+                            <span class="dt">trait=</span><span class="st">'yield'</span>, <span class="dt">threshold=</span><span class="st">'Li&amp;Ji'</span>,
+                             <span class="dt">p=</span><span class="fl">0.05</span>, <span class="dt">out.file=</span><span class="st">'GWAS naive model'</span>)</code></pre></div>
+</div>
+</div>
+</div>
+<div id="references" class="section level2">
+<h2>References</h2>
+<p>Comadran J, Thomas W, van Eeuwijk F, Ceccarelli S, Grando S, Stanca A, Pecchioni N, Akar T, Al-Yassin A, Benbelkacem A, Ouabbou H, Bort J, Romagosa I, Hackett Russell J (2009) Patterns of genetic diversity and linkage disequilibrium in a highly structured Hordeum vulgare association-mapping population for the Mediterranean basin. Theor Appl Genet 119:175-187</p>
+<p>Kraakman ATW, Niks RE, Van den Berg PMMM, Stam P, Van Eeuwijk FA (2004) Linkage Disequilibrium Mapping of Yield and Yield Stability in Modern Spring Barley Cultivars.Genetics 168:435-446</p>
+<p>Malosetti M, van der Linden CG, Vosman B, van Eeuwijk FA (2007) A Mixed-Model Approach to Association Mapping Using Pedigree Information With an Illustration of Resistance to Phytophthora infestans in Potato. Genetics 175:879-889</p>
+<p>Patterson N, Price AL, Reich D (2006) Population Structure and Eigenanalysis. PLoS Genet 2:e190</p>
+<p>Pritchard JK, Stephens M, Rosenberg NA, Donnelly P (2000) Association mapping in<br />
+structured populations. Am J Hum Genet 67:170-181</p>
+<p>Yu J, Pressoir G, Briggs WH, Vroh Bi I, Yamasaki M, Doebley JF, McMullen MD, Gaut BS, Nielsen DM, Holland JB, Kresovich S, Buckler ES (2006) A unified mixed-model method for association mapping that accounts for multiple levels of relatedness. Nat Genet 38:203-208</p>
+</div>
+
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
